@@ -11,6 +11,16 @@ const passport = require('passport')
 passport.initialize()
 passport.session()
 
+const LocalStrategy = require('passport-local');
+passport.use(new LocalStrategy((username, password, done) => {
+  myDataBase.findOne({ username: username }, (err, user) => {
+    console.log(`User ${username} attempted to log in.`);
+    if (err) return done(err);
+    if (!user) return done(null, false);
+    if (password !== user.password) return done(null, false);
+    return done(null, user);
+  });
+}));
 
 fccTesting(app); //For FCC testing purposes
 app.use('/public', express.static(process.cwd() + '/public'));
