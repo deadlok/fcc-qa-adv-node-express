@@ -32,7 +32,6 @@ app.use(express.urlencoded({ extended: true }));
 app.set('view engine','pug');
 app.set('views', './views/pug');
 
-
 myDB(async client => {
 
   const myDataBase = await client.db('database').collection('users');
@@ -79,7 +78,8 @@ myDB(async client => {
   app
     .route('/profile')
     .get(ensureAuthenticated, (req, res) => {
-      res.render('profile');
+      console.log(req.user)
+      res.render('profile',{username: req.user.username});
   });
 
 
