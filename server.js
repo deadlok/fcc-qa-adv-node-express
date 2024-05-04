@@ -78,10 +78,27 @@ myDB(async client => {
   app
     .route('/profile')
     .get(ensureAuthenticated, (req, res) => {
-      console.log(req.user)
+      //console.log(req.user)
       res.render('profile',{username: req.user.username});
-  });
+    });
 
+  app
+    .route('/logout')
+    .get((req, res, next)=>{
+      req.logout((err)=>{
+        if (err) {
+          return next(err)         
+        }
+        res.redirect('/');
+      });
+    })
+  
+  app
+    .use((req, res, next)=>{
+        res.status(404)
+          .type('text')
+          .send('Not Found')
+    })
 
 }).catch(e => {
   app.route('/').get((req, res) => {
