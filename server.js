@@ -4,9 +4,11 @@ const express = require('express');
 const myDB = require('./connection');
 const fccTesting = require('./freeCodeCamp/fcctesting.js');
 
+const { ObjectID } = require('mongodb');
 const passport = require('passport')
 const LocalStrategy = require('passport-local');
 const session = require('express-session')
+
 
 const app = express();
 
@@ -19,8 +21,8 @@ app.use(session({
 }));
 
 // Passpord Initialization //
-passport.initialize()
-passport.session()
+app.use(passport.initialize())
+app.use(passport.session())
 
 fccTesting(app); //For FCC testing purposes
 app.use('/public', express.static(process.cwd() + '/public'));
@@ -30,11 +32,6 @@ app.use(express.urlencoded({ extended: true }));
 app.set('view engine','pug');
 app.set('views', './views/pug');
 
-//app.route('/').get((req, res) => {
-//    res.render('index',{title: 'Hello', message: 'Please log in' })
-//});
-
-const { ObjectID } = require('mongodb');
 
 myDB(async client => {
 
@@ -72,21 +69,34 @@ myDB(async client => {
     });
   }));
 
+
   app.post('/login', 
   passport.authenticate('local',{failureRedirect: '/' }),
   (err, res) => {
     res.redirect('/profile')
   }) 
 
-  app.route('/profile').get((req, res) => {
-    res.render('profile',{USERNAME: 'xxx'})
+  app
+    .route('/profile')
+    .get(ensureAuthenticated, (req, res) => {
+      res.render('profile');
   });
+
 
 }).catch(e => {
   app.route('/').get((req, res) => {
     res.render('index', { title: e, message: 'Unable to connect to database' });
   });
 });
+
+function ensureAuthenticated(req, res, next) {
+  //console.log(req)
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/');
+};
+
 // app.listen out here...
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
