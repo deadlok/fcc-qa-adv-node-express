@@ -39,13 +39,13 @@ myDB(async client => {
   // Be sure to change the title
   app.route('/').get((req, res) => {
     // Change the response to render the Pug template
-
     res.render('index', {
       title: 'Connected to Database',
       message: 'Please login',
-      showLogin: true 
+      showLogin: true
     });
   });
+
   // Serialization and deserialization here...
   passport.serializeUser((user, done) => {
     done(null, user._id);
@@ -67,7 +67,6 @@ myDB(async client => {
       return done(null, user);
     });
   }));
-
 
   app.post('/login', 
   passport.authenticate('local',{failureRedirect: '/' }),
@@ -92,13 +91,51 @@ myDB(async client => {
         res.redirect('/');
       });
     })
-  
-  app
-    .use((req, res, next)=>{
-        res.status(404)
-          .type('text')
-          .send('Not Found')
+
+  app.route('/register').get((req, res) => {
+    res.render('index', {showRegistration: true})
+  })
+
+  app.route('/register')
+  .post((req, res, next) => {
+    console.log('begin register')
+    myDataBase.findOne({ username: req.body.username }, (err, user) => {
+      if (err) {
+        console.log(err)
+        next(err);
+      } else if (user) {
+        res.redirect('/');
+      } else {
+        myDataBase.insertOne({
+          username: req.body.username,
+          password: req.body.password
+        },  
+          (err, doc) => {
+            if (err) {
+              console.log(err)
+              res.redirect('/');
+            } else {
+              // The inserted document is held within
+              // the ops property of the doc
+              next(null, doc.ops[0]);
+            }
+          }
+        )
+      }
     })
+  },
+    passport.authenticate('local', { failureRedirect: '/' }),
+    (req, res, next) => {
+      res.redirect('/profile');
+    }
+  );
+
+  app
+  .use((req, res, next)=>{
+      res.status(404)
+        .type('text')
+        .send('Not Found')
+  })
 
 }).catch(e => {
   app.route('/').get((req, res) => {
