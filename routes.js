@@ -12,7 +12,8 @@ module.exports = function(app, myDataBase) {
     res.render('index', {
       title: 'Connected to Database',
       message: 'Please login',
-      showLogin: true
+      showLogin: true,
+      showSocialAuth: true
     });
   });
 
@@ -59,17 +60,17 @@ module.exports = function(app, myDataBase) {
       } else {
         const hash = bcrypt.hashSync(req.body.password, 12);
         myDataBase.insertOne(
-          {username: req.body.username, password: hash},  
-          (err, doc) => {
-            if (err) {
-              console.log(err)
-              res.redirect('/');
-            } else {
-              // The inserted document is held within
-              // the ops property of the doc
-              next(null, doc.ops[0]);
+            {username: req.body.username, password: hash},  
+            (err, doc) => {
+                if (err) {
+                    console.log(err)
+                    res.redirect('/');
+                } else {
+                    // The inserted document is held within
+                    // the ops property of the doc
+                    next(null, doc.ops[0]);
+                }
             }
-          }
         )
       }
     })
@@ -80,14 +81,27 @@ module.exports = function(app, myDataBase) {
   (req, res, next) => {
     res.redirect('/profile');
   }
-  ) //end post;
+  ) //end register post;
 
-//   app
-//   .use((req, res, next)=>{
-//       res.status(404)
-//         .type('text')
-//         .send('Not Found')
-//   });
+  app.route('/auth/github')
+  .get(
+    passport.authenticate('github',{failureRedirect: '/' }),
+    (err, res) => {
+        res.redirect('/profile')
+    }
+  )
+
+  app.route('/auth/github/callback')
+  .get(
+    
+  )
+
+   app
+   .use((req, res, next)=>{
+       res.status(404)
+         .type('text')
+         .send('Not Found')
+   });
 
 }
 
