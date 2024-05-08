@@ -39,6 +39,12 @@ myDB(async client => {
     console.log('A user has connected');
   });
 
+  io.on('disconnect', () => {
+    -- currentUsers;
+    io.emit('user count', currentUsers);
+    console.log('A user has disconnectted');
+  });
+
   auth(app, myDataBase);
   routes(app, myDataBase);
 }).catch(e => {
