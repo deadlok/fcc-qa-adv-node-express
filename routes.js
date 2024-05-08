@@ -29,16 +29,21 @@ module.exports = function(app, myDataBase) {
     res.render('profile',{username: req.user.username});
   });
 
-  app
-  .route('/logout')
-  .get((req, res, next)=>{
-    req.logout((err)=>{
-      if (err) {
-        return next(err)         
-      }
-      res.redirect('/');
-    });
-  })
+  app.route('/logout').get((req, res) => {
+    req.logout();
+    res.redirect('/');
+  });
+
+//   app
+//   .route('/logout')
+//   .get((req, res, next)=>{
+//     req.logout((err)=>{
+//       if (err) {
+//         return next(err)         
+//       }
+//       res.redirect('/');
+//     });
+//   })
 
   app.route('/register')
   .get((req, res) => {
