@@ -2,7 +2,6 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local');
 const bcrypt = require('bcrypt')
 
-
 module.exports = function(app, myDataBase) {
 
   // Be sure to change the title
@@ -92,12 +91,18 @@ module.exports = function(app, myDataBase) {
   .get(
     passport.authenticate('github',{failureRedirect: '/' }),
     (err, res) => {
-        res.redirect('/profile')
+        req.session.user_id = req.user.id;
+        res.redirect('/chat');
     }
   )
 
-   app
-   .use((req, res, next)=>{
+  app.route('/chat')
+  .get(ensureAuthenticated, (req, res) => {
+    //console.log(req.user)
+    res.render('chat',{user: req.user});
+  })
+
+   app.use((req, res, next)=>{
        res.status(404)
          .type('text')
          .send('Not Found')
