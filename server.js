@@ -78,9 +78,16 @@ myDB(async client => {
       io.emit('user', {
         username: socket.request.user.username,
         currentUsers,
-        connected: true
+        connected: false
       });
     });
+
+    socket.on('chat message', (message) => {
+      io.emit('chat message', {
+        username: socket.request.user.username,
+        message: message
+      })
+    })
   });
 
 
