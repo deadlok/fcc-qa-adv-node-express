@@ -42,17 +42,6 @@ io.use(
   })
 );
 
-// function onAuthorizeSuccess(data, accept){
-//   console.log('successful connection to socket.io');
-//   accept();
-// }
-
-// function onAuthorizeFail(data, message, error, accept){
-//   console.log('failed connection to socket.io:', data, message);
-//   if(error)
-//     accept(new Error(message));
-// }
-
 function onAuthorizeSuccess(data, accept) {
   console.log('successful connection to socket.io');
   accept(null, true);
@@ -78,15 +67,23 @@ myDB(async client => {
   let currentUsers = 0;
   io.on('connection', socket => {
     ++ currentUsers;
-    io.emit('user count', currentUsers);
-    console.log('user ' + socket.request.user.username + ' connected');
+    io.emit('user', {
+      username: socket.request.user.username,
+      currentUsers,
+      connected: true
+    });
 
     socket.on('disconnect', () => {
       -- currentUsers;
-      io.emit('user count', currentUsers);
-      console.log('user ' + socket.request.user.username + ' disconnected');
+      io.emit('user', {
+        username: socket.request.user.username,
+        currentUsers,
+        connected: true
+      });
     });
   });
+
+
 
   auth(app, myDataBase);
   routes(app, myDataBase);
